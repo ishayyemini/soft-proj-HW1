@@ -3,4 +3,4 @@ project(HW1 C)
 
 set(CMAKE_C_STANDARD 90)
 
-add_executable(HW1 main.c)
+add_executable(HW1 kmeans.c)
