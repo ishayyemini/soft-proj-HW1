@@ -1,11 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 void error(char *msg) {
     printf("%s\n", msg);
     exit(1);
 }
 
+double euclidian_distance(double* point1, double* point2, int dim) {
+    double sum = 0;
+    int i;
+    for (i = 0; i < dim; ++i) sum += pow(point1[i] - point2[i], 2);
+    return pow(sum, 0.5);
+}
+
+void calculate_centroid(double* centroid, double** cluster, int c_size, int dim) {
+    int i, j;
+
+    for (i = 0; i < c_size; i++) {
+        for (j = 0; j < dim; j++) printf("%.4f,", cluster[i][j]);
+        printf("\n");
+    }
+
+    for (j = 0; j < dim; j++) centroid[j] = 0.0;
+    for (i = 0; i < c_size; i++)
+        for (j = 0; j < dim; j++)
+            centroid[j] += cluster[i][j];
+    for (j = 0; j < dim; j++) centroid[j] /= c_size;
+}
 
 
 int main(int argc, char *argv[]) {
@@ -19,6 +41,15 @@ int main(int argc, char *argv[]) {
 
     double **points;
     int size = 256;
+
+    double **centroids, **new_centroids;
+    int i, j;
+    int closest = 0;
+    double min_dist;
+    double curr_dist;
+
+    double ***clusters;
+    int *c_sizes;
 
     char *line = NULL;
     char *line_ptr;
@@ -36,10 +67,12 @@ int main(int argc, char *argv[]) {
     getline(&line,&len,stdin);
 
     /* we now need: check how many "," are in line. this is our dimension! */
-    for (coord_i = 0; line[coord_i]; coord_i++) if (line[coord_i] == ',') dimension++;
+    for (coord_i = 0; line[coord_i]; coord_i++)
+        if (line[coord_i] == ',') dimension++;
 
     points = calloc(size, sizeof(double *));
 
+    /* read all points and input them into points matrix */
     do {
         if (line_i >= size) {
             double **tmp;
@@ -58,6 +91,39 @@ int main(int argc, char *argv[]) {
         }
         line_i++;
     } while (getline(&line,&len,stdin) != -1);
+    size = line_i;
+
+    /* first assign */
+    centroids = calloc(k, sizeof(double *));
+    new_centroids = calloc(k, sizeof(double *));
+    clusters = calloc(k, sizeof(double **));
+    c_sizes = calloc(k, sizeof(int));
+    for (i = 0; i < k; ++i) {
+        centroids[i] = points[i];
+        new_centroids[i] = calloc(dimension, sizeof(double));
+        clusters[i] = calloc(size, sizeof(double *));
+        c_sizes[i] = 0;
+    }
+
+    for (i = 0; i < size; i++) {
+        min_dist = euclidian_distance(points[i], centroids[0], dimension);
+        for (j = 1; j < k; j++) {
+            curr_dist = euclidian_distance(points[i], centroids[j], dimension);
+            if (curr_dist < min_dist) {
+                min_dist = curr_dist;
+                closest = j;
+            }
+        }
+        clusters[closest][c_sizes[closest]++] = points[i];
+    }
+
+    for (i = 0; i < k; i++) {
+        printf("cluster %d\n", i);
+        calculate_centroid(new_centroids[i], clusters[i], c_sizes[i], dimension);
+        printf("c_size: %d ", c_sizes[i]);
+        for (j = 0; j < dimension; j++) printf("%.4f,", new_centroids[i][j]);
+        printf("\n\n");
+    }
 
     printf("dimension: %d\n", dimension);
 
@@ -66,6 +132,10 @@ int main(int argc, char *argv[]) {
     printf("%d %d %f\n", k, iter, epsilon);
 
     free(points);
+    free(centroids);
+    free(clusters);
+    free(c_sizes);
+    free(new_centroids);
 
     /* error checking */
     return 0;
