@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
     int size = 256;
 
     char *line = NULL;
+    char *line_ptr;
     size_t len = 0;
     int line_i = 0;
 
@@ -49,8 +50,11 @@ int main(int argc, char *argv[]) {
         }
 
         points[line_i] = calloc(dimension, sizeof(double));
-        for (coord_i = 0; coord_i < dimension; coord_i++, line++) {
-            points[line_i][coord_i] = strtod(line, &line);
+        line_ptr = line;
+        for (coord_i = 0; coord_i < dimension; coord_i++) {
+            points[line_i][coord_i] = strtod(line_ptr, &line_ptr);
+            /* Move past the comma */
+            if (*line_ptr == ',') line_ptr++;
         }
         line_i++;
     } while (getline(&line,&len,stdin) != -1);
