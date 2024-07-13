@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-double euclidian_distance(double *point1, double *point2, int dim) {
+double euclidean_distance(double *point1, double *point2, int dim) {
     double sum = 0;
     int i;
     for (i = 0; i < dim; ++i) sum += pow(point1[i] - point2[i], 2);
@@ -124,7 +124,15 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < k; ++i) {
         new_centroids[i] = calloc(dimension, sizeof(double));
         clusters[i] = calloc(size, sizeof(double *));
-        if (new_centroids[i] == NULL || clusters[i] == NULL) err("An Error Has Occurred\n")
+        if (new_centroids[i] == NULL || clusters[i] == NULL) {
+            for (j = 0; j < i; j++) {
+                free(new_centroids[j]);
+                free(clusters[j]);
+            }
+            free(new_centroids);
+            free(clusters);
+            err("An Error Has Occurred")
+        }
     }
 
 
@@ -134,10 +142,10 @@ int main(int argc, char *argv[]) {
         /* assign points to clusters */
         for (i = 0; i < size; i++) {
             /* calculate distance from point i to the first centroid and then calculate the rest */
-            double min_dist = euclidian_distance(points[i], centroids[0], dimension);
+            double min_dist = euclidean_distance(points[i], centroids[0], dimension);
             int closest = 0;
             for (j = 1; j < k; j++) {
-                double curr_dist = euclidian_distance(points[i], centroids[j], dimension);
+                double curr_dist = euclidean_distance(points[i], centroids[j], dimension);
                 if (curr_dist < min_dist) {
                     min_dist = curr_dist;
                     closest = j;
@@ -151,7 +159,7 @@ int main(int argc, char *argv[]) {
         for (i = 0; i < k; i++) {
             double curr_dist;
             calculate_centroid(new_centroids[i], clusters[i], c_sizes[i], dimension);
-            curr_dist = euclidian_distance(centroids[i], new_centroids[i], dimension);
+            curr_dist = euclidean_distance(centroids[i], new_centroids[i], dimension);
             if (max_cent_dist < curr_dist) max_cent_dist = curr_dist;
             for (j = 0; j < dimension; j++) centroids[i][j] = new_centroids[i][j];
         }
