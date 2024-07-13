@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -99,7 +101,7 @@ int main(int argc, char *argv[]) {
         for (i = 0; i < k; ++i) {
             new_centroids[i] = calloc(dimension, sizeof(double));
             clusters[i] = calloc(size, sizeof(double *));
-            for (j = 0; j < size; j++) clusters[i][j] = clusters[i][j] = calloc(dimension, sizeof(double));
+            for (j = 0; j < size; j++) clusters[i][j] = calloc(dimension, sizeof(double));
             c_sizes[i] = 0;
         }
 
