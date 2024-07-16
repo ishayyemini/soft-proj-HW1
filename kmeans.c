@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 
     if (argc == 3) {
         iter = parse_integer(argv[2]);
-        if (iter <= 1 || iter >= 1000) err("Invalid maximum iteration\n")
+        if (iter <= 1 || iter >= 1000) err("Invalid maximum iteration!\n")
     }
 
     points = calloc(size, sizeof(double *));
