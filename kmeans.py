@@ -1,3 +1,4 @@
+import math
 import sys
 
 
@@ -5,11 +6,15 @@ def euclidean_distance(point1, point2):
     return sum((point1[d] - point2[d]) ** 2 for d in range(len(point1))) ** 0.5
 
 
+def parse_int(num):
+    return int(float(num)) if int(float(num)) == float(num) else 0
+
+
 error_msg = "An Error Has Occurred"
 
 try:
-    k = int(sys.argv[1])
-    iter_num = int(sys.argv[2]) if len(sys.argv) >= 4 else 200
+    k = parse_int(sys.argv[1])
+    iter_num = parse_int(sys.argv[2]) if len(sys.argv) >= 4 else 200
     path_to_file = sys.argv[3] if len(sys.argv) >= 4 else sys.argv[2]
     epsilon = 0.001
 
