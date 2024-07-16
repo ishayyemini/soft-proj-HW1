@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define err(x) { printf(x); exit(1); }
+#define err(x) { printf(x); free_memory(size, k, c_sizes, points, new_centroids, centroids, clusters); exit(1); }
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,23 +28,48 @@ int parse_integer(char *str) {
     return 0;
 }
 
+void free_memory(int size, int k, int *c_sizes, double **points, double **new_centroids, double **centroids, double ***clusters) {
+    int i;
+    if (points != NULL) {
+        for (i = 0; i < size; i++) if (points[i] != NULL) free(points[i]);
+        free(points);
+    }
+
+    if (new_centroids != NULL) {
+        for (i = 0; i < k; i++) if (new_centroids[i] != NULL) free(new_centroids[i]);
+        free(new_centroids);
+    }
+
+    if (clusters != NULL) {
+        for (i = 0; i < k; i++) if (clusters[i] != NULL) free(clusters[i]);
+        free(clusters);
+    }
+
+    if (centroids != NULL) {
+        for (i = 0; i < k; i++) if (centroids[i] != NULL) free(centroids[i]);
+        free(centroids);
+    }
+
+    if (c_sizes != NULL) free(c_sizes);
+}
+
 int main(int argc, char *argv[]) {
-    int k;
+    int k = 0;
     int iter = 200;
     double epsilon = 0.001;
 
-    double **points;
+    double **points = NULL;
     int size = 256;
     int dimension = 1;
 
-    double **centroids;
+    double **centroids = NULL;
     double max_cent_dist;
     int i, j;
     int iter_i;
 
-    double **new_centroids;
-    double ***clusters;
-    int *c_sizes;
+    double **new_centroids = NULL;
+    double ***clusters = NULL;
+    int *c_sizes = NULL;
 
     int line_i = 0, coord_i;
     char *line = NULL;
@@ -75,21 +100,12 @@ int main(int argc, char *argv[]) {
             double **tmp;
             size *= 2;
             tmp = realloc(points, size * sizeof(double *));
-            if (tmp == NULL) {
-                for (i = 0; i < line_i; i++) free(points[i]);
-                free(points);
-                err("An Error Has Occurred\n")
-            }
+            if (tmp == NULL) err("An Error Has Occurred\n")
             points = tmp;
         }
 
         points[line_i] = calloc(dimension, sizeof(double));
-        if (points[line_i] == NULL) {
-            for (i = 0; i < line_i; i++) free(points[i]);
-            free(points);
-            free(line);
-            err("An Error Has Occurred\n")
-        }
+        if (points[line_i] == NULL) err("An Error Has Occurred\n")
         line_ptr = line;
         for (coord_i = 0; coord_i < dimension; coord_i++) {
             points[line_i][coord_i] = strtod(line_ptr, &line_ptr);
@@ -108,11 +124,7 @@ int main(int argc, char *argv[]) {
     if (centroids == NULL) err("An Error Has Occurred\n")
     for (i = 0; i < k; ++i) {
         centroids[i] = calloc(dimension, sizeof(double));
-        if (centroids[i] == NULL) {
-            for(j = 0; j < i; j++) free(centroids[j]);
-            free(centroids);
-            err("An Error Has Occurred")
-        }
+        if (centroids[i] == NULL) err("An Error Has Occurred\n")
         for (j = 0; j < dimension; j++) centroids[i][j] = points[i][j];
     }
 
@@ -124,15 +136,7 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < k; ++i) {
         new_centroids[i] = calloc(dimension, sizeof(double));
         clusters[i] = calloc(size, sizeof(double *));
-        if (new_centroids[i] == NULL || clusters[i] == NULL) {
-            for (j = 0; j < i; j++) {
-                free(new_centroids[j]);
-                free(clusters[j]);
-            }
-            free(new_centroids);
-            free(clusters);
-            err("An Error Has Occurred")
-        }
+        if (new_centroids[i] == NULL || clusters[i] == NULL) err("An Error Has Occurred\n")
     }
 
 
@@ -169,18 +173,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* memory de-allocation */
-    for (i = 0; i < size; i++) free(points[i]);
-    free(points);
-
-    for (i = 0; i < k; i++) free(new_centroids[i]);
-    free(new_centroids);
-
-    for (i = 0; i < k; i++) free(clusters[i]);
-    free(clusters);
-
-    free(c_sizes);
-
     /* printing the centroids */
     for (i = 0; i < k; i++) {
         for (j = 0; j < dimension; j++) {
@@ -191,8 +183,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* memory de-allocation */
-    for (i = 0; i < k; i++) free(centroids[i]);
-    free(centroids);
+    free_memory(size, k, c_sizes, points, new_centroids, centroids, clusters);
 
     return 0;
 }
