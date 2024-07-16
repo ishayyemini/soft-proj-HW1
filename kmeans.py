@@ -42,7 +42,6 @@ try:
             distances = [euclidean_distance(point, centroids[i]) for i in range(k)]
             closest = min(range(k), key=lambda x: distances[x])
             clusters[closest].append(point)
-            print("point %d is assigned to cluster %d" % (i, closest))
             i += 1
 
         # calculating new centroids for checking convergence
@@ -50,13 +49,6 @@ try:
             tuple(sum(coord) / len(cluster) for coord in zip(*cluster))
             for cluster in clusters
         ]
-
-        print("run %d" % iter_i)
-        for d in range(len(centroids)):
-            print("centroid %d" % d, centroids[d])
-        for d in range(len(new_centroids)):
-            print("new centroid %d" % d, new_centroids[d])
-        print()
 
         # if max convergence for all new centroids is less than epsilon then the condition applies for all
         if (
