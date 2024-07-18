@@ -7,7 +7,10 @@ def euclidean_distance(point1, point2):
 
 
 def parse_int(num):
-    return int(float(num)) if int(float(num)) == float(num) else 0
+    try:
+        return int(float(num)) if int(float(num)) == float(num) else 0
+    except:
+        return 0
 
 
 error_msg = "An Error Has Occurred"
